@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>4_efficientdet.lib.src.dataset API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>4_efficientdet.lib.src.dataset</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import os
+import torch
+import numpy as np
+
+from torch.utils.data import Dataset, DataLoader
+from pycocotools.coco import COCO
+import cv2
+
+
+class CocoDataset(Dataset):
+    def __init__(self, root_dir, img_dir=&#34;images&#34;, set_dir=&#39;train2017&#39;, transform=None):
+
+        self.root_dir = root_dir
+        self.img_dir = img_dir
+        self.set_name = set_dir
+        self.transform = transform
+
+        self.coco = COCO(os.path.join(self.root_dir, &#39;annotations&#39;, &#39;instances_&#39; + self.set_name + &#39;.json&#39;))
+        self.image_ids = self.coco.getImgIds()
+
+        self.load_classes()
+
+    def load_classes(self):
+
+        # load class names (name -&gt; label)
+        categories = self.coco.loadCats(self.coco.getCatIds())
+        categories.sort(key=lambda x: x[&#39;id&#39;])
+
+        self.classes = {}
+        self.coco_labels = {}
+        self.coco_labels_inverse = {}
+        for c in categories:
+            self.coco_labels[len(self.classes)] = c[&#39;id&#39;]
+            self.coco_labels_inverse[c[&#39;id&#39;]] = len(self.classes)
+            self.classes[c[&#39;name&#39;]] = len(self.classes)
+
+        # also load the reverse (label -&gt; name)
+        self.labels = {}
+        for key, value in self.classes.items():
+            self.labels[value] = key
+
+    def __len__(self):
+        return len(self.image_ids)
+
+    def __getitem__(self, idx):
+
+        img = self.load_image(idx)
+        annot = self.load_annotations(idx)
+        sample = {&#39;img&#39;: img, &#39;annot&#39;: annot}
+        if self.transform:
+            sample = self.transform(sample)
+        return sample
+
+    def load_image(self, image_index):
+        image_info = self.coco.loadImgs(self.image_ids[image_index])[0]
+        path = os.path.join(self.root_dir, self.img_dir, self.set_name, image_info[&#39;file_name&#39;])
+        img = cv2.imread(path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        # if len(img.shape) == 2:
+        #     img = skimage.color.gray2rgb(img)
+
+        return img.astype(np.float32) / 255.
+
+    def load_annotations(self, image_index):
+        # get ground truth annotations
+        annotations_ids = self.coco.getAnnIds(imgIds=self.image_ids[image_index], iscrowd=False)
+        annotations = np.zeros((0, 5))
+
+        # some images appear to miss annotations
+        if len(annotations_ids) == 0:
+            return annotations
+
+        # parse annotations
+        coco_annotations = self.coco.loadAnns(annotations_ids)
+        for idx, a in enumerate(coco_annotations):
+
+            # some annotations have basically no width / height, skip them
+            if a[&#39;bbox&#39;][2] &lt; 1 or a[&#39;bbox&#39;][3] &lt; 1:
+                continue
+
+            annotation = np.zeros((1, 5))
+            annotation[0, :4] = a[&#39;bbox&#39;]
+            annotation[0, 4] = self.coco_label_to_label(a[&#39;category_id&#39;])
+            annotations = np.append(annotations, annotation, axis=0)
+
+        # transform from [x, y, w, h] to [x1, y1, x2, y2]
+        annotations[:, 2] = annotations[:, 0] + annotations[:, 2]
+        annotations[:, 3] = annotations[:, 1] + annotations[:, 3]
+
+        return annotations
+
+    def coco_label_to_label(self, coco_label):
+        return self.coco_labels_inverse[coco_label]
+
+    def label_to_coco_label(self, label):
+        return self.coco_labels[label]
+
+    def num_classes(self):
+        return len(self.classes)
+
+
+def collater(data):
+    imgs = [s[&#39;img&#39;] for s in data]
+    annots = [s[&#39;annot&#39;] for s in data]
+    scales = [s[&#39;scale&#39;] for s in data]
+
+    imgs = torch.from_numpy(np.stack(imgs, axis=0))
+
+    max_num_annots = max(annot.shape[0] for annot in annots)
+
+    if max_num_annots &gt; 0:
+
+        annot_padded = torch.ones((len(annots), max_num_annots, 5)) * -1
+
+        if max_num_annots &gt; 0:
+            for idx, annot in enumerate(annots):
+                if annot.shape[0] &gt; 0:
+                    annot_padded[idx, :annot.shape[0], :] = annot
+    else:
+        annot_padded = torch.ones((len(annots), 1, 5)) * -1
+
+    imgs = imgs.permute(0, 3, 1, 2)
+
+    return {&#39;img&#39;: imgs, &#39;annot&#39;: annot_padded, &#39;scale&#39;: scales}
+
+
+class Resizer(object):
+    &#34;&#34;&#34;Convert ndarrays in sample to Tensors.&#34;&#34;&#34;
+
+    def __call__(self, sample, common_size=512):
+        image, annots = sample[&#39;img&#39;], sample[&#39;annot&#39;]
+        height, width, _ = image.shape
+        if height &gt; width:
+            scale = common_size / height
+            resized_height = common_size
+            resized_width = int(width * scale)
+        else:
+            scale = common_size / width
+            resized_height = int(height * scale)
+            resized_width = common_size
+
+        image = cv2.resize(image, (resized_width, resized_height))
+
+        new_image = np.zeros((common_size, common_size, 3))
+        new_image[0:resized_height, 0:resized_width] = image
+
+        annots[:, :4] *= scale
+
+        return {&#39;img&#39;: torch.from_numpy(new_image), &#39;annot&#39;: torch.from_numpy(annots), &#39;scale&#39;: scale}
+
+
+class Augmenter(object):
+    &#34;&#34;&#34;Convert ndarrays in sample to Tensors.&#34;&#34;&#34;
+
+    def __call__(self, sample, flip_x=0.5):
+        if np.random.rand() &lt; flip_x:
+            image, annots = sample[&#39;img&#39;], sample[&#39;annot&#39;]
+            image = image[:, ::-1, :]
+
+            rows, cols, channels = image.shape
+
+            x1 = annots[:, 0].copy()
+            x2 = annots[:, 2].copy()
+
+            x_tmp = x1.copy()
+
+            annots[:, 0] = cols - x2
+            annots[:, 2] = cols - x_tmp
+
+            sample = {&#39;img&#39;: image, &#39;annot&#39;: annots}
+
+        return sample
+
+
+class Normalizer(object):
+
+    def __init__(self):
+        self.mean = np.array([[[0.485, 0.456, 0.406]]])
+        self.std = np.array([[[0.229, 0.224, 0.225]]])
+
+    def __call__(self, sample):
+        image, annots = sample[&#39;img&#39;], sample[&#39;annot&#39;]
+
+        return {&#39;img&#39;: ((image.astype(np.float32) - self.mean) / self.std), &#39;annot&#39;: annots}</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="4_efficientdet.lib.src.dataset.collater"><code class="name flex">
+<span>def <span class="ident">collater</span></span>(<span>data)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def collater(data):
+    imgs = [s[&#39;img&#39;] for s in data]
+    annots = [s[&#39;annot&#39;] for s in data]
+    scales = [s[&#39;scale&#39;] for s in data]
+
+    imgs = torch.from_numpy(np.stack(imgs, axis=0))
+
+    max_num_annots = max(annot.shape[0] for annot in annots)
+
+    if max_num_annots &gt; 0:
+
+        annot_padded = torch.ones((len(annots), max_num_annots, 5)) * -1
+
+        if max_num_annots &gt; 0:
+            for idx, annot in enumerate(annots):
+                if annot.shape[0] &gt; 0:
+                    annot_padded[idx, :annot.shape[0], :] = annot
+    else:
+        annot_padded = torch.ones((len(annots), 1, 5)) * -1
+
+    imgs = imgs.permute(0, 3, 1, 2)
+
+    return {&#39;img&#39;: imgs, &#39;annot&#39;: annot_padded, &#39;scale&#39;: scales}</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="4_efficientdet.lib.src.dataset.Augmenter"><code class="flex name class">
+<span>class <span class="ident">Augmenter</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert ndarrays in sample to Tensors.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Augmenter(object):
+    &#34;&#34;&#34;Convert ndarrays in sample to Tensors.&#34;&#34;&#34;
+
+    def __call__(self, sample, flip_x=0.5):
+        if np.random.rand() &lt; flip_x:
+            image, annots = sample[&#39;img&#39;], sample[&#39;annot&#39;]
+            image = image[:, ::-1, :]
+
+            rows, cols, channels = image.shape
+
+            x1 = annots[:, 0].copy()
+            x2 = annots[:, 2].copy()
+
+            x_tmp = x1.copy()
+
+            annots[:, 0] = cols - x2
+            annots[:, 2] = cols - x_tmp
+
+            sample = {&#39;img&#39;: image, &#39;annot&#39;: annots}
+
+        return sample</code></pre>
+</details>
+</dd>
+<dt id="4_efficientdet.lib.src.dataset.CocoDataset"><code class="flex name class">
+<span>class <span class="ident">CocoDataset</span></span>
+<span>(</span><span>root_dir, img_dir='images', set_dir='train2017', transform=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>An abstract class representing a :class:<code>Dataset</code>.</p>
+<p>All datasets that represent a map from keys to data samples should subclass
+it. All subclasses should overrite :meth:<code>__getitem__</code>, supporting fetching a
+data sample for a given key. Subclasses could also optionally overwrite
+:meth:<code>__len__</code>, which is expected to return the size of the dataset by many
+:class:<code>~torch.utils.data.Sampler</code> implementations and the default options
+of :class:<code>~torch.utils.data.DataLoader</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>:class:<code>~torch.utils.data.DataLoader</code> by default constructs a index
+sampler that yields integral indices.
+To make it work with a map-style
+dataset with non-integral indices/keys, a custom sampler must be provided.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CocoDataset(Dataset):
+    def __init__(self, root_dir, img_dir=&#34;images&#34;, set_dir=&#39;train2017&#39;, transform=None):
+
+        self.root_dir = root_dir
+        self.img_dir = img_dir
+        self.set_name = set_dir
+        self.transform = transform
+
+        self.coco = COCO(os.path.join(self.root_dir, &#39;annotations&#39;, &#39;instances_&#39; + self.set_name + &#39;.json&#39;))
+        self.image_ids = self.coco.getImgIds()
+
+        self.load_classes()
+
+    def load_classes(self):
+
+        # load class names (name -&gt; label)
+        categories = self.coco.loadCats(self.coco.getCatIds())
+        categories.sort(key=lambda x: x[&#39;id&#39;])
+
+        self.classes = {}
+        self.coco_labels = {}
+        self.coco_labels_inverse = {}
+        for c in categories:
+            self.coco_labels[len(self.classes)] = c[&#39;id&#39;]
+            self.coco_labels_inverse[c[&#39;id&#39;]] = len(self.classes)
+            self.classes[c[&#39;name&#39;]] = len(self.classes)
+
+        # also load the reverse (label -&gt; name)
+        self.labels = {}
+        for key, value in self.classes.items():
+            self.labels[value] = key
+
+    def __len__(self):
+        return len(self.image_ids)
+
+    def __getitem__(self, idx):
+
+        img = self.load_image(idx)
+        annot = self.load_annotations(idx)
+        sample = {&#39;img&#39;: img, &#39;annot&#39;: annot}
+        if self.transform:
+            sample = self.transform(sample)
+        return sample
+
+    def load_image(self, image_index):
+        image_info = self.coco.loadImgs(self.image_ids[image_index])[0]
+        path = os.path.join(self.root_dir, self.img_dir, self.set_name, image_info[&#39;file_name&#39;])
+        img = cv2.imread(path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        # if len(img.shape) == 2:
+        #     img = skimage.color.gray2rgb(img)
+
+        return img.astype(np.float32) / 255.
+
+    def load_annotations(self, image_index):
+        # get ground truth annotations
+        annotations_ids = self.coco.getAnnIds(imgIds=self.image_ids[image_index], iscrowd=False)
+        annotations = np.zeros((0, 5))
+
+        # some images appear to miss annotations
+        if len(annotations_ids) == 0:
+            return annotations
+
+        # parse annotations
+        coco_annotations = self.coco.loadAnns(annotations_ids)
+        for idx, a in enumerate(coco_annotations):
+
+            # some annotations have basically no width / height, skip them
+            if a[&#39;bbox&#39;][2] &lt; 1 or a[&#39;bbox&#39;][3] &lt; 1:
+                continue
+
+            annotation = np.zeros((1, 5))
+            annotation[0, :4] = a[&#39;bbox&#39;]
+            annotation[0, 4] = self.coco_label_to_label(a[&#39;category_id&#39;])
+            annotations = np.append(annotations, annotation, axis=0)
+
+        # transform from [x, y, w, h] to [x1, y1, x2, y2]
+        annotations[:, 2] = annotations[:, 0] + annotations[:, 2]
+        annotations[:, 3] = annotations[:, 1] + annotations[:, 3]
+
+        return annotations
+
+    def coco_label_to_label(self, coco_label):
+        return self.coco_labels_inverse[coco_label]
+
+    def label_to_coco_label(self, label):
+        return self.coco_labels[label]
+
+    def num_classes(self):
+        return len(self.classes)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.utils.data.dataset.Dataset</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="4_efficientdet.lib.src.dataset.CocoDataset.coco_label_to_label"><code class="name flex">
+<span>def <span class="ident">coco_label_to_label</span></span>(<span>self, coco_label)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def coco_label_to_label(self, coco_label):
+    return self.coco_labels_inverse[coco_label]</code></pre>
+</details>
+</dd>
+<dt id="4_efficientdet.lib.src.dataset.CocoDataset.label_to_coco_label"><code class="name flex">
+<span>def <span class="ident">label_to_coco_label</span></span>(<span>self, label)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def label_to_coco_label(self, label):
+    return self.coco_labels[label]</code></pre>
+</details>
+</dd>
+<dt id="4_efficientdet.lib.src.dataset.CocoDataset.load_annotations"><code class="name flex">
+<span>def <span class="ident">load_annotations</span></span>(<span>self, image_index)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_annotations(self, image_index):
+    # get ground truth annotations
+    annotations_ids = self.coco.getAnnIds(imgIds=self.image_ids[image_index], iscrowd=False)
+    annotations = np.zeros((0, 5))
+
+    # some images appear to miss annotations
+    if len(annotations_ids) == 0:
+        return annotations
+
+    # parse annotations
+    coco_annotations = self.coco.loadAnns(annotations_ids)
+    for idx, a in enumerate(coco_annotations):
+
+        # some annotations have basically no width / height, skip them
+        if a[&#39;bbox&#39;][2] &lt; 1 or a[&#39;bbox&#39;][3] &lt; 1:
+            continue
+
+        annotation = np.zeros((1, 5))
+        annotation[0, :4] = a[&#39;bbox&#39;]
+        annotation[0, 4] = self.coco_label_to_label(a[&#39;category_id&#39;])
+        annotations = np.append(annotations, annotation, axis=0)
+
+    # transform from [x, y, w, h] to [x1, y1, x2, y2]
+    annotations[:, 2] = annotations[:, 0] + annotations[:, 2]
+    annotations[:, 3] = annotations[:, 1] + annotations[:, 3]
+
+    return annotations</code></pre>
+</details>
+</dd>
+<dt id="4_efficientdet.lib.src.dataset.CocoDataset.load_classes"><code class="name flex">
+<span>def <span class="ident">load_classes</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_classes(self):
+
+    # load class names (name -&gt; label)
+    categories = self.coco.loadCats(self.coco.getCatIds())
+    categories.sort(key=lambda x: x[&#39;id&#39;])
+
+    self.classes = {}
+    self.coco_labels = {}
+    self.coco_labels_inverse = {}
+    for c in categories:
+        self.coco_labels[len(self.classes)] = c[&#39;id&#39;]
+        self.coco_labels_inverse[c[&#39;id&#39;]] = len(self.classes)
+        self.classes[c[&#39;name&#39;]] = len(self.classes)
+
+    # also load the reverse (label -&gt; name)
+    self.labels = {}
+    for key, value in self.classes.items():
+        self.labels[value] = key</code></pre>
+</details>
+</dd>
+<dt id="4_efficientdet.lib.src.dataset.CocoDataset.load_image"><code class="name flex">
+<span>def <span class="ident">load_image</span></span>(<span>self, image_index)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_image(self, image_index):
+    image_info = self.coco.loadImgs(self.image_ids[image_index])[0]
+    path = os.path.join(self.root_dir, self.img_dir, self.set_name, image_info[&#39;file_name&#39;])
+    img = cv2.imread(path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    # if len(img.shape) == 2:
+    #     img = skimage.color.gray2rgb(img)
+
+    return img.astype(np.float32) / 255.</code></pre>
+</details>
+</dd>
+<dt id="4_efficientdet.lib.src.dataset.CocoDataset.num_classes"><code class="name flex">
+<span>def <span class="ident">num_classes</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def num_classes(self):
+    return len(self.classes)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="4_efficientdet.lib.src.dataset.Normalizer"><code class="flex name class">
+<span>class <span class="ident">Normalizer</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Normalizer(object):
+
+    def __init__(self):
+        self.mean = np.array([[[0.485, 0.456, 0.406]]])
+        self.std = np.array([[[0.229, 0.224, 0.225]]])
+
+    def __call__(self, sample):
+        image, annots = sample[&#39;img&#39;], sample[&#39;annot&#39;]
+
+        return {&#39;img&#39;: ((image.astype(np.float32) - self.mean) / self.std), &#39;annot&#39;: annots}</code></pre>
+</details>
+</dd>
+<dt id="4_efficientdet.lib.src.dataset.Resizer"><code class="flex name class">
+<span>class <span class="ident">Resizer</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert ndarrays in sample to Tensors.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Resizer(object):
+    &#34;&#34;&#34;Convert ndarrays in sample to Tensors.&#34;&#34;&#34;
+
+    def __call__(self, sample, common_size=512):
+        image, annots = sample[&#39;img&#39;], sample[&#39;annot&#39;]
+        height, width, _ = image.shape
+        if height &gt; width:
+            scale = common_size / height
+            resized_height = common_size
+            resized_width = int(width * scale)
+        else:
+            scale = common_size / width
+            resized_height = int(height * scale)
+            resized_width = common_size
+
+        image = cv2.resize(image, (resized_width, resized_height))
+
+        new_image = np.zeros((common_size, common_size, 3))
+        new_image[0:resized_height, 0:resized_width] = image
+
+        annots[:, :4] *= scale
+
+        return {&#39;img&#39;: torch.from_numpy(new_image), &#39;annot&#39;: torch.from_numpy(annots), &#39;scale&#39;: scale}</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="4_efficientdet.lib.src" href="index.html">4_efficientdet.lib.src</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="4_efficientdet.lib.src.dataset.collater" href="#4_efficientdet.lib.src.dataset.collater">collater</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="4_efficientdet.lib.src.dataset.Augmenter" href="#4_efficientdet.lib.src.dataset.Augmenter">Augmenter</a></code></h4>
+</li>
+<li>
+<h4><code><a title="4_efficientdet.lib.src.dataset.CocoDataset" href="#4_efficientdet.lib.src.dataset.CocoDataset">CocoDataset</a></code></h4>
+<ul class="two-column">
+<li><code><a title="4_efficientdet.lib.src.dataset.CocoDataset.coco_label_to_label" href="#4_efficientdet.lib.src.dataset.CocoDataset.coco_label_to_label">coco_label_to_label</a></code></li>
+<li><code><a title="4_efficientdet.lib.src.dataset.CocoDataset.label_to_coco_label" href="#4_efficientdet.lib.src.dataset.CocoDataset.label_to_coco_label">label_to_coco_label</a></code></li>
+<li><code><a title="4_efficientdet.lib.src.dataset.CocoDataset.load_annotations" href="#4_efficientdet.lib.src.dataset.CocoDataset.load_annotations">load_annotations</a></code></li>
+<li><code><a title="4_efficientdet.lib.src.dataset.CocoDataset.load_classes" href="#4_efficientdet.lib.src.dataset.CocoDataset.load_classes">load_classes</a></code></li>
+<li><code><a title="4_efficientdet.lib.src.dataset.CocoDataset.load_image" href="#4_efficientdet.lib.src.dataset.CocoDataset.load_image">load_image</a></code></li>
+<li><code><a title="4_efficientdet.lib.src.dataset.CocoDataset.num_classes" href="#4_efficientdet.lib.src.dataset.CocoDataset.num_classes">num_classes</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="4_efficientdet.lib.src.dataset.Normalizer" href="#4_efficientdet.lib.src.dataset.Normalizer">Normalizer</a></code></h4>
+</li>
+<li>
+<h4><code><a title="4_efficientdet.lib.src.dataset.Resizer" href="#4_efficientdet.lib.src.dataset.Resizer">Resizer</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

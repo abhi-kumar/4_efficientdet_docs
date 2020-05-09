@@ -1,0 +1,1552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>4_efficientdet.lib.train_detector API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>4_efficientdet.lib.train_detector</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import os
+import argparse
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
+from torchvision import transforms
+from src.dataset import CocoDataset, Resizer, Normalizer, Augmenter, collater
+from src.model import EfficientDet
+from tensorboardX import SummaryWriter
+import shutil
+import numpy as np
+from tqdm.autonotebook import tqdm
+
+
+class Detector():
+    &#39;&#39;&#39;
+    Class to train a detector
+
+    Args:
+        verbose (int): Set verbosity levels
+                        0 - Print Nothing
+                        1 - Print desired details
+    &#39;&#39;&#39;
+    def __init__(self, verbose=1):
+        self.system_dict = {};
+        self.system_dict[&#34;verbose&#34;] = verbose;
+        self.system_dict[&#34;local&#34;] = {};
+        self.system_dict[&#34;dataset&#34;] = {};
+        self.system_dict[&#34;dataset&#34;][&#34;train&#34;] = {};
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;] = {};
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;status&#34;] = False;
+
+        self.system_dict[&#34;params&#34;] = {};
+        self.system_dict[&#34;params&#34;][&#34;image_size&#34;] = 512;
+        self.system_dict[&#34;params&#34;][&#34;batch_size&#34;] = 8;
+        self.system_dict[&#34;params&#34;][&#34;num_workers&#34;] = 3;
+        self.system_dict[&#34;params&#34;][&#34;use_gpu&#34;] = True;
+        self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;] = [0];
+        self.system_dict[&#34;params&#34;][&#34;lr&#34;] = 0.0001;
+        self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;] = 10;
+        self.system_dict[&#34;params&#34;][&#34;val_interval&#34;] = 1;
+        self.system_dict[&#34;params&#34;][&#34;es_min_delta&#34;] = 0.0;
+        self.system_dict[&#34;params&#34;][&#34;es_patience&#34;] = 0;
+
+
+        self.system_dict[&#34;output&#34;] = {};
+        self.system_dict[&#34;output&#34;][&#34;log_path&#34;] = &#34;tensorboard/signatrix_efficientdet_coco&#34;;
+        self.system_dict[&#34;output&#34;][&#34;saved_path&#34;] = &#34;trained/&#34;;
+        self.system_dict[&#34;output&#34;][&#34;best_epoch&#34;] = 0;
+        self.system_dict[&#34;output&#34;][&#34;best_loss&#34;] = 1e5;
+
+
+
+    def Train_Dataset(self, root_dir, coco_dir, img_dir, set_dir, batch_size=8, image_size=512, use_gpu=True, num_workers=3):
+        &#39;&#39;&#39;
+        User function: Set training dataset parameters
+
+        Dataset Directory Structure
+
+                   root_dir
+                      |
+                      |------coco_dir 
+                      |         |
+                      |         |----img_dir
+                      |                |
+                      |                |------&lt;set_dir_train&gt; (set_dir) (Train)
+                      |                         |
+                      |                         |---------img1.jpg
+                      |                         |---------img2.jpg
+                      |                         |---------..........(and so on)  
+                      |
+                      |
+                      |         |---annotations 
+                      |         |----|
+                      |              |--------------------instances_Train.json  (instances_&lt;set_dir_train&gt;.json)
+                      |              |--------------------classes.txt
+                      
+                      
+             - instances_Train.json -&gt; In proper COCO format
+             - classes.txt          -&gt; A list of classes in alphabetical order
+             
+
+            For TrainSet
+             - root_dir = &#34;../sample_dataset&#34;;
+             - coco_dir = &#34;kangaroo&#34;;
+             - img_dir = &#34;images&#34;;
+             - set_dir = &#34;Train&#34;;
+            
+             
+            Note: Annotation file name too coincides against the set_dir
+
+        Args:
+            root_dir (str): Path to root directory containing coco_dir
+            coco_dir (str): Name of coco_dir containing image folder and annotation folder
+            img_dir (str): Name of folder containing all training and validation folders
+            set_dir (str): Name of folder containing all training images
+            batch_size (int): Mini batch sampling size for training epochs
+            image_size (int): Either of [512, 300]
+            use_gpu (bool): If True use GPU else run on CPU
+            num_workers (int): Number of parallel processors for data loader 
+
+        Returns:
+            None
+        &#39;&#39;&#39;
+        self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;root_dir&#34;] = root_dir;
+        self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;coco_dir&#34;] = coco_dir;
+        self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;img_dir&#34;] = img_dir;
+        self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;set_dir&#34;] = set_dir;
+
+
+        self.system_dict[&#34;params&#34;][&#34;batch_size&#34;] = batch_size;
+        self.system_dict[&#34;params&#34;][&#34;image_size&#34;] = image_size;
+        self.system_dict[&#34;params&#34;][&#34;use_gpu&#34;] = use_gpu;
+        self.system_dict[&#34;params&#34;][&#34;num_workers&#34;] = num_workers;
+
+        if(self.system_dict[&#34;params&#34;][&#34;use_gpu&#34;]):
+            if torch.cuda.is_available():
+                self.system_dict[&#34;local&#34;][&#34;num_gpus&#34;] = torch.cuda.device_count()
+                torch.cuda.manual_seed(123)
+            else:
+                torch.manual_seed(123)
+
+        self.system_dict[&#34;local&#34;][&#34;training_params&#34;] = {&#34;batch_size&#34;: self.system_dict[&#34;params&#34;][&#34;batch_size&#34;] * self.system_dict[&#34;local&#34;][&#34;num_gpus&#34;],
+                                                           &#34;shuffle&#34;: True,
+                                                           &#34;drop_last&#34;: True,
+                                                           &#34;collate_fn&#34;: collater,
+                                                           &#34;num_workers&#34;: self.system_dict[&#34;params&#34;][&#34;num_workers&#34;]}
+
+        self.system_dict[&#34;local&#34;][&#34;training_set&#34;] = CocoDataset(root_dir=self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;root_dir&#34;] + &#34;/&#34; + self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;coco_dir&#34;],
+                                                            img_dir = self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;img_dir&#34;],
+                                                            set_dir = self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;set_dir&#34;],
+                                                            transform = transforms.Compose([Normalizer(), Augmenter(), Resizer()]))
+        
+        self.system_dict[&#34;local&#34;][&#34;training_generator&#34;] = DataLoader(self.system_dict[&#34;local&#34;][&#34;training_set&#34;], 
+                                                                    **self.system_dict[&#34;local&#34;][&#34;training_params&#34;]);
+
+
+    def Val_Dataset(self, root_dir, coco_dir, img_dir, set_dir):
+        &#39;&#39;&#39;
+        User function: Set training dataset parameters
+
+        Dataset Directory Structure
+
+                   root_dir
+                      |
+                      |------coco_dir 
+                      |         |
+                      |         |----img_dir
+                      |                |
+                      |                |------&lt;set_dir_val&gt; (set_dir) (Validation)
+                      |                         |
+                      |                         |---------img1.jpg
+                      |                         |---------img2.jpg
+                      |                         |---------..........(and so on)  
+                      |
+                      |
+                      |         |---annotations 
+                      |         |----|
+                      |              |--------------------instances_Val.json  (instances_&lt;set_dir_val&gt;.json)
+                      |              |--------------------classes.txt
+                      
+                      
+             - instances_Train.json -&gt; In proper COCO format
+             - classes.txt          -&gt; A list of classes in alphabetical order
+
+             
+            For ValSet
+             - root_dir = &#34;..sample_dataset&#34;;
+             - coco_dir = &#34;kangaroo&#34;;
+             - img_dir = &#34;images&#34;;
+             - set_dir = &#34;Val&#34;;
+             
+             Note: Annotation file name too coincides against the set_dir
+
+        Args:
+            root_dir (str): Path to root directory containing coco_dir
+            coco_dir (str): Name of coco_dir containing image folder and annotation folder
+            img_dir (str): Name of folder containing all training and validation folders
+            set_dir (str): Name of folder containing all validation images
+
+        Returns:
+            None
+        &#39;&#39;&#39;
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;status&#34;] = True;
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;root_dir&#34;] = root_dir;
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;coco_dir&#34;] = coco_dir;
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;img_dir&#34;] = img_dir;
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;set_dir&#34;] = set_dir;     
+
+        self.system_dict[&#34;local&#34;][&#34;val_params&#34;] = {&#34;batch_size&#34;: self.system_dict[&#34;params&#34;][&#34;batch_size&#34;],
+                                                   &#34;shuffle&#34;: False,
+                                                   &#34;drop_last&#34;: False,
+                                                   &#34;collate_fn&#34;: collater,
+                                                   &#34;num_workers&#34;: self.system_dict[&#34;params&#34;][&#34;num_workers&#34;]}
+
+        self.system_dict[&#34;local&#34;][&#34;val_set&#34;] = CocoDataset(root_dir=self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;root_dir&#34;] + &#34;/&#34; + self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;coco_dir&#34;], 
+                                                    img_dir = self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;img_dir&#34;],
+                                                    set_dir = self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;set_dir&#34;],
+                                                    transform=transforms.Compose([Normalizer(), Resizer()]))
+        
+        self.system_dict[&#34;local&#34;][&#34;test_generator&#34;] = DataLoader(self.system_dict[&#34;local&#34;][&#34;val_set&#34;], 
+                                                                **self.system_dict[&#34;local&#34;][&#34;val_params&#34;])
+
+
+    def Model(self,gpu_devices=[0]):
+        &#39;&#39;&#39;
+        User function: Set Model parameters
+
+        Args:
+            gpu_devices (list): List of GPU Device IDs to be used in training
+
+        Returns:
+            None
+        &#39;&#39;&#39;
+        num_classes = self.system_dict[&#34;local&#34;][&#34;training_set&#34;].num_classes();
+        efficientdet = EfficientDet(num_classes=num_classes)
+
+        if self.system_dict[&#34;params&#34;][&#34;use_gpu&#34;]:
+            self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;] = gpu_devices
+            if len(self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;])==1:
+                os.environ[&#34;CUDA_VISIBLE_DEVICES&#34;] = str(self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;][0])
+            else:
+                os.environ[&#34;CUDA_VISIBLE_DEVICES&#34;] = &#39;,&#39;.join([str(id) for id in self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;]])
+            self.system_dict[&#34;local&#34;][&#34;device&#34;] = &#39;cuda&#39; if torch.cuda.is_available() else &#39;cpu&#39;
+            efficientdet = efficientdet.to(self.system_dict[&#34;local&#34;][&#34;device&#34;])
+            efficientdet= torch.nn.DataParallel(efficientdet).to(self.system_dict[&#34;local&#34;][&#34;device&#34;])
+
+        self.system_dict[&#34;local&#34;][&#34;model&#34;] = efficientdet;
+        self.system_dict[&#34;local&#34;][&#34;model&#34;].train();
+
+
+    def Set_Hyperparams(self, lr=0.0001, val_interval=1, es_min_delta=0.0, es_patience=0):
+        &#39;&#39;&#39;
+        User function: Set hyper parameters
+
+        Args:
+            lr (float): Initial learning rate for training
+            val_interval (int): Post specified number of training epochs, a validation epoch will be carried out
+            es_min_delta (float): Loss detla value, if loss doesnn&#39;t change more than this value for &#34;es_patience&#34; number of epochs, training will be stopped early
+            es_patience (int): If loss doesnn&#39;t change more than this &#34;es_min_delta&#34; value for &#34;es_patience&#34; number of epochs, training will be stopped early
+
+        Returns:
+            None
+        &#39;&#39;&#39;
+        self.system_dict[&#34;params&#34;][&#34;lr&#34;] = lr;
+        self.system_dict[&#34;params&#34;][&#34;val_interval&#34;] = val_interval;
+        self.system_dict[&#34;params&#34;][&#34;es_min_delta&#34;] = es_min_delta;
+        self.system_dict[&#34;params&#34;][&#34;es_patience&#34;] = es_patience;
+
+
+        self.system_dict[&#34;local&#34;][&#34;optimizer&#34;] = torch.optim.Adam(self.system_dict[&#34;local&#34;][&#34;model&#34;].parameters(), 
+                                                                    self.system_dict[&#34;params&#34;][&#34;lr&#34;]);
+
+        self.system_dict[&#34;local&#34;][&#34;scheduler&#34;] = torch.optim.lr_scheduler.ReduceLROnPlateau(self.system_dict[&#34;local&#34;][&#34;optimizer&#34;], 
+                                                                    patience=3, verbose=True)
+
+
+    def Train(self, num_epochs=2, model_output_dir=&#34;trained/&#34;):
+        &#39;&#39;&#39;
+        User function: Start training
+
+        Args:
+            num_epochs (int): Number of epochs to train for
+            model_output_dir (str): Path to directory where all trained models will be saved
+
+        Returns:
+            None
+        &#39;&#39;&#39;
+        self.system_dict[&#34;output&#34;][&#34;log_path&#34;] = &#34;tensorboard/signatrix_efficientdet_coco&#34;;
+        self.system_dict[&#34;output&#34;][&#34;saved_path&#34;] = model_output_dir;
+        self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;] = num_epochs;
+
+        if os.path.isdir(self.system_dict[&#34;output&#34;][&#34;log_path&#34;]):
+            shutil.rmtree(self.system_dict[&#34;output&#34;][&#34;log_path&#34;])
+        os.makedirs(self.system_dict[&#34;output&#34;][&#34;log_path&#34;])
+
+        if os.path.isdir(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;]):
+            shutil.rmtree(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;])
+        os.makedirs(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;])
+
+        writer = SummaryWriter(self.system_dict[&#34;output&#34;][&#34;log_path&#34;])
+
+        num_iter_per_epoch = len(self.system_dict[&#34;local&#34;][&#34;training_generator&#34;])
+
+        if(self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;status&#34;]):
+            
+            for epoch in range(self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;]):
+                self.system_dict[&#34;local&#34;][&#34;model&#34;].train()
+
+                epoch_loss = []
+                progress_bar = tqdm(self.system_dict[&#34;local&#34;][&#34;training_generator&#34;])
+                for iter, data in enumerate(progress_bar):
+                    try:
+                        self.system_dict[&#34;local&#34;][&#34;optimizer&#34;].zero_grad()
+                        if torch.cuda.is_available():
+                            cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;]).float(), data[&#39;annot&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;])])
+                        else:
+                            cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].float(), data[&#39;annot&#39;]])
+
+                        cls_loss = cls_loss.mean()
+                        reg_loss = reg_loss.mean()
+                        loss = cls_loss + reg_loss
+                        if loss == 0:
+                            continue
+                        loss.backward()
+                        torch.nn.utils.clip_grad_norm_(self.system_dict[&#34;local&#34;][&#34;model&#34;].parameters(), 0.1)
+                        self.system_dict[&#34;local&#34;][&#34;optimizer&#34;].step()
+                        epoch_loss.append(float(loss))
+                        total_loss = np.mean(epoch_loss)
+
+                        progress_bar.set_description(
+                            &#39;Epoch: {}/{}. Iteration: {}/{}. Cls loss: {:.5f}. Reg loss: {:.5f}. Batch loss: {:.5f} Total loss: {:.5f}&#39;.format(
+                                epoch + 1, self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;], iter + 1, num_iter_per_epoch, cls_loss, reg_loss, loss,
+                                total_loss))
+                        writer.add_scalar(&#39;Train/Total_loss&#39;, total_loss, epoch * num_iter_per_epoch + iter)
+                        writer.add_scalar(&#39;Train/Regression_loss&#39;, reg_loss, epoch * num_iter_per_epoch + iter)
+                        writer.add_scalar(&#39;Train/Classfication_loss (focal loss)&#39;, cls_loss, epoch * num_iter_per_epoch + iter)
+
+                    except Exception as e:
+                        print(e)
+                        continue
+                self.system_dict[&#34;local&#34;][&#34;scheduler&#34;].step(np.mean(epoch_loss))
+
+                if epoch % self.system_dict[&#34;params&#34;][&#34;val_interval&#34;] == 0:
+
+                    self.system_dict[&#34;local&#34;][&#34;model&#34;].eval()
+                    loss_regression_ls = []
+                    loss_classification_ls = []
+                    for iter, data in enumerate(self.system_dict[&#34;local&#34;][&#34;test_generator&#34;]):
+                        with torch.no_grad():
+                            if torch.cuda.is_available():
+                                cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;]).float(), data[&#39;annot&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;])])
+                            else:
+                                cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].float(), data[&#39;annot&#39;]])
+
+                            cls_loss = cls_loss.mean()
+                            reg_loss = reg_loss.mean()
+
+                            loss_classification_ls.append(float(cls_loss))
+                            loss_regression_ls.append(float(reg_loss))
+
+                    cls_loss = np.mean(loss_classification_ls)
+                    reg_loss = np.mean(loss_regression_ls)
+                    loss = cls_loss + reg_loss
+
+                    print(
+                        &#39;Epoch: {}/{}. Classification loss: {:1.5f}. Regression loss: {:1.5f}. Total loss: {:1.5f}&#39;.format(
+                            epoch + 1, self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;], cls_loss, reg_loss,
+                            np.mean(loss)))
+                    writer.add_scalar(&#39;Val/Total_loss&#39;, loss, epoch)
+                    writer.add_scalar(&#39;Val/Regression_loss&#39;, reg_loss, epoch)
+                    writer.add_scalar(&#39;Val/Classfication_loss (focal loss)&#39;, cls_loss, epoch)
+
+                    if loss + self.system_dict[&#34;params&#34;][&#34;es_min_delta&#34;] &lt; self.system_dict[&#34;output&#34;][&#34;best_loss&#34;]:
+                        self.system_dict[&#34;output&#34;][&#34;best_loss&#34;] = loss
+                        self.system_dict[&#34;output&#34;][&#34;best_epoch&#34;] = epoch
+                        torch.save(self.system_dict[&#34;local&#34;][&#34;model&#34;], 
+                            os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.pth&#34;))
+
+                        dummy_input = torch.rand(1, 3, 512, 512)
+                        if torch.cuda.is_available():
+                            dummy_input = dummy_input.cuda()
+                        if isinstance(self.system_dict[&#34;local&#34;][&#34;model&#34;], nn.DataParallel):
+                            self.system_dict[&#34;local&#34;][&#34;model&#34;].module.backbone_net.model.set_swish(memory_efficient=False)
+
+                            torch.onnx.export(self.system_dict[&#34;local&#34;][&#34;model&#34;].module, dummy_input,
+                                              os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.onnx&#34;),
+                                              verbose=False)
+                            self.system_dict[&#34;local&#34;][&#34;model&#34;].module.backbone_net.model.set_swish(memory_efficient=True)
+                        else:
+                            self.system_dict[&#34;local&#34;][&#34;model&#34;].backbone_net.model.set_swish(memory_efficient=False)
+
+                            torch.onnx.export(self.system_dict[&#34;local&#34;][&#34;model&#34;], dummy_input,
+                                              os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.onnx&#34;),
+                                              verbose=False)
+                            self.system_dict[&#34;local&#34;][&#34;model&#34;].backbone_net.model.set_swish(memory_efficient=True)
+
+                    # Early stopping
+                    if epoch - self.system_dict[&#34;output&#34;][&#34;best_epoch&#34;] &gt; self.system_dict[&#34;params&#34;][&#34;es_patience&#34;] &gt; 0:
+                        print(&#34;Stop training at epoch {}. The lowest loss achieved is {}&#34;.format(epoch, loss))
+                        break
+
+        else:
+            for epoch in range(self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;]):
+                self.system_dict[&#34;local&#34;][&#34;model&#34;].train()
+
+                epoch_loss = []
+                progress_bar = tqdm(self.system_dict[&#34;local&#34;][&#34;training_generator&#34;])
+                for iter, data in enumerate(progress_bar):
+                    try:
+                        self.system_dict[&#34;local&#34;][&#34;optimizer&#34;].zero_grad()
+                        if torch.cuda.is_available():
+                            cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;]).float(), data[&#39;annot&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;])])
+                        else:
+                            cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].float(), data[&#39;annot&#39;]])
+
+                        cls_loss = cls_loss.mean()
+                        reg_loss = reg_loss.mean()
+                        loss = cls_loss + reg_loss
+                        if loss == 0:
+                            continue
+                        loss.backward()
+                        torch.nn.utils.clip_grad_norm_(self.system_dict[&#34;local&#34;][&#34;model&#34;].parameters(), 0.1)
+                        self.system_dict[&#34;local&#34;][&#34;optimizer&#34;].step()
+                        epoch_loss.append(float(loss))
+                        total_loss = np.mean(epoch_loss)
+
+                        progress_bar.set_description(
+                            &#39;Epoch: {}/{}. Iteration: {}/{}. Cls loss: {:.5f}. Reg loss: {:.5f}. Batch loss: {:.5f} Total loss: {:.5f}&#39;.format(
+                                epoch + 1, self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;], iter + 1, num_iter_per_epoch, cls_loss, reg_loss, loss,
+                                total_loss))
+                        writer.add_scalar(&#39;Train/Total_loss&#39;, total_loss, epoch * num_iter_per_epoch + iter)
+                        writer.add_scalar(&#39;Train/Regression_loss&#39;, reg_loss, epoch * num_iter_per_epoch + iter)
+                        writer.add_scalar(&#39;Train/Classfication_loss (focal loss)&#39;, cls_loss, epoch * num_iter_per_epoch + iter)
+
+                    except Exception as e:
+                        print(e)
+                        continue
+                self.system_dict[&#34;local&#34;][&#34;scheduler&#34;].step(np.mean(epoch_loss))
+
+
+                torch.save(self.system_dict[&#34;local&#34;][&#34;model&#34;], 
+                    os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.pth&#34;))
+
+                dummy_input = torch.rand(1, 3, 512, 512)
+                if torch.cuda.is_available():
+                    dummy_input = dummy_input.to(self.system_dict[&#34;local&#34;][&#34;device&#34;])
+                if isinstance(self.system_dict[&#34;local&#34;][&#34;model&#34;], nn.DataParallel):
+                    self.system_dict[&#34;local&#34;][&#34;model&#34;].module.backbone_net.model.set_swish(memory_efficient=False)
+
+                    torch.onnx.export(self.system_dict[&#34;local&#34;][&#34;model&#34;].module, dummy_input,
+                                      os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.onnx&#34;),
+                                      verbose=False)
+                    self.system_dict[&#34;local&#34;][&#34;model&#34;].module.backbone_net.model.set_swish(memory_efficient=True)
+                else:
+                    self.system_dict[&#34;local&#34;][&#34;model&#34;].backbone_net.model.set_swish(memory_efficient=False)
+
+                    torch.onnx.export(self.system_dict[&#34;local&#34;][&#34;model&#34;], dummy_input,
+                                      os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.onnx&#34;),
+                                      verbose=False)
+                    self.system_dict[&#34;local&#34;][&#34;model&#34;].backbone_net.model.set_swish(memory_efficient=True)
+
+
+        writer.close()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="4_efficientdet.lib.train_detector.Detector"><code class="flex name class">
+<span>class <span class="ident">Detector</span></span>
+<span>(</span><span>verbose=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Class to train a detector</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>int</code></dt>
+<dd>Set verbosity levels
+0 - Print Nothing
+1 - Print desired details</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Detector():
+    &#39;&#39;&#39;
+    Class to train a detector
+
+    Args:
+        verbose (int): Set verbosity levels
+                        0 - Print Nothing
+                        1 - Print desired details
+    &#39;&#39;&#39;
+    def __init__(self, verbose=1):
+        self.system_dict = {};
+        self.system_dict[&#34;verbose&#34;] = verbose;
+        self.system_dict[&#34;local&#34;] = {};
+        self.system_dict[&#34;dataset&#34;] = {};
+        self.system_dict[&#34;dataset&#34;][&#34;train&#34;] = {};
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;] = {};
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;status&#34;] = False;
+
+        self.system_dict[&#34;params&#34;] = {};
+        self.system_dict[&#34;params&#34;][&#34;image_size&#34;] = 512;
+        self.system_dict[&#34;params&#34;][&#34;batch_size&#34;] = 8;
+        self.system_dict[&#34;params&#34;][&#34;num_workers&#34;] = 3;
+        self.system_dict[&#34;params&#34;][&#34;use_gpu&#34;] = True;
+        self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;] = [0];
+        self.system_dict[&#34;params&#34;][&#34;lr&#34;] = 0.0001;
+        self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;] = 10;
+        self.system_dict[&#34;params&#34;][&#34;val_interval&#34;] = 1;
+        self.system_dict[&#34;params&#34;][&#34;es_min_delta&#34;] = 0.0;
+        self.system_dict[&#34;params&#34;][&#34;es_patience&#34;] = 0;
+
+
+        self.system_dict[&#34;output&#34;] = {};
+        self.system_dict[&#34;output&#34;][&#34;log_path&#34;] = &#34;tensorboard/signatrix_efficientdet_coco&#34;;
+        self.system_dict[&#34;output&#34;][&#34;saved_path&#34;] = &#34;trained/&#34;;
+        self.system_dict[&#34;output&#34;][&#34;best_epoch&#34;] = 0;
+        self.system_dict[&#34;output&#34;][&#34;best_loss&#34;] = 1e5;
+
+
+
+    def Train_Dataset(self, root_dir, coco_dir, img_dir, set_dir, batch_size=8, image_size=512, use_gpu=True, num_workers=3):
+        &#39;&#39;&#39;
+        User function: Set training dataset parameters
+
+        Dataset Directory Structure
+
+                   root_dir
+                      |
+                      |------coco_dir 
+                      |         |
+                      |         |----img_dir
+                      |                |
+                      |                |------&lt;set_dir_train&gt; (set_dir) (Train)
+                      |                         |
+                      |                         |---------img1.jpg
+                      |                         |---------img2.jpg
+                      |                         |---------..........(and so on)  
+                      |
+                      |
+                      |         |---annotations 
+                      |         |----|
+                      |              |--------------------instances_Train.json  (instances_&lt;set_dir_train&gt;.json)
+                      |              |--------------------classes.txt
+                      
+                      
+             - instances_Train.json -&gt; In proper COCO format
+             - classes.txt          -&gt; A list of classes in alphabetical order
+             
+
+            For TrainSet
+             - root_dir = &#34;../sample_dataset&#34;;
+             - coco_dir = &#34;kangaroo&#34;;
+             - img_dir = &#34;images&#34;;
+             - set_dir = &#34;Train&#34;;
+            
+             
+            Note: Annotation file name too coincides against the set_dir
+
+        Args:
+            root_dir (str): Path to root directory containing coco_dir
+            coco_dir (str): Name of coco_dir containing image folder and annotation folder
+            img_dir (str): Name of folder containing all training and validation folders
+            set_dir (str): Name of folder containing all training images
+            batch_size (int): Mini batch sampling size for training epochs
+            image_size (int): Either of [512, 300]
+            use_gpu (bool): If True use GPU else run on CPU
+            num_workers (int): Number of parallel processors for data loader 
+
+        Returns:
+            None
+        &#39;&#39;&#39;
+        self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;root_dir&#34;] = root_dir;
+        self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;coco_dir&#34;] = coco_dir;
+        self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;img_dir&#34;] = img_dir;
+        self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;set_dir&#34;] = set_dir;
+
+
+        self.system_dict[&#34;params&#34;][&#34;batch_size&#34;] = batch_size;
+        self.system_dict[&#34;params&#34;][&#34;image_size&#34;] = image_size;
+        self.system_dict[&#34;params&#34;][&#34;use_gpu&#34;] = use_gpu;
+        self.system_dict[&#34;params&#34;][&#34;num_workers&#34;] = num_workers;
+
+        if(self.system_dict[&#34;params&#34;][&#34;use_gpu&#34;]):
+            if torch.cuda.is_available():
+                self.system_dict[&#34;local&#34;][&#34;num_gpus&#34;] = torch.cuda.device_count()
+                torch.cuda.manual_seed(123)
+            else:
+                torch.manual_seed(123)
+
+        self.system_dict[&#34;local&#34;][&#34;training_params&#34;] = {&#34;batch_size&#34;: self.system_dict[&#34;params&#34;][&#34;batch_size&#34;] * self.system_dict[&#34;local&#34;][&#34;num_gpus&#34;],
+                                                           &#34;shuffle&#34;: True,
+                                                           &#34;drop_last&#34;: True,
+                                                           &#34;collate_fn&#34;: collater,
+                                                           &#34;num_workers&#34;: self.system_dict[&#34;params&#34;][&#34;num_workers&#34;]}
+
+        self.system_dict[&#34;local&#34;][&#34;training_set&#34;] = CocoDataset(root_dir=self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;root_dir&#34;] + &#34;/&#34; + self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;coco_dir&#34;],
+                                                            img_dir = self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;img_dir&#34;],
+                                                            set_dir = self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;set_dir&#34;],
+                                                            transform = transforms.Compose([Normalizer(), Augmenter(), Resizer()]))
+        
+        self.system_dict[&#34;local&#34;][&#34;training_generator&#34;] = DataLoader(self.system_dict[&#34;local&#34;][&#34;training_set&#34;], 
+                                                                    **self.system_dict[&#34;local&#34;][&#34;training_params&#34;]);
+
+
+    def Val_Dataset(self, root_dir, coco_dir, img_dir, set_dir):
+        &#39;&#39;&#39;
+        User function: Set training dataset parameters
+
+        Dataset Directory Structure
+
+                   root_dir
+                      |
+                      |------coco_dir 
+                      |         |
+                      |         |----img_dir
+                      |                |
+                      |                |------&lt;set_dir_val&gt; (set_dir) (Validation)
+                      |                         |
+                      |                         |---------img1.jpg
+                      |                         |---------img2.jpg
+                      |                         |---------..........(and so on)  
+                      |
+                      |
+                      |         |---annotations 
+                      |         |----|
+                      |              |--------------------instances_Val.json  (instances_&lt;set_dir_val&gt;.json)
+                      |              |--------------------classes.txt
+                      
+                      
+             - instances_Train.json -&gt; In proper COCO format
+             - classes.txt          -&gt; A list of classes in alphabetical order
+
+             
+            For ValSet
+             - root_dir = &#34;..sample_dataset&#34;;
+             - coco_dir = &#34;kangaroo&#34;;
+             - img_dir = &#34;images&#34;;
+             - set_dir = &#34;Val&#34;;
+             
+             Note: Annotation file name too coincides against the set_dir
+
+        Args:
+            root_dir (str): Path to root directory containing coco_dir
+            coco_dir (str): Name of coco_dir containing image folder and annotation folder
+            img_dir (str): Name of folder containing all training and validation folders
+            set_dir (str): Name of folder containing all validation images
+
+        Returns:
+            None
+        &#39;&#39;&#39;
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;status&#34;] = True;
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;root_dir&#34;] = root_dir;
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;coco_dir&#34;] = coco_dir;
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;img_dir&#34;] = img_dir;
+        self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;set_dir&#34;] = set_dir;     
+
+        self.system_dict[&#34;local&#34;][&#34;val_params&#34;] = {&#34;batch_size&#34;: self.system_dict[&#34;params&#34;][&#34;batch_size&#34;],
+                                                   &#34;shuffle&#34;: False,
+                                                   &#34;drop_last&#34;: False,
+                                                   &#34;collate_fn&#34;: collater,
+                                                   &#34;num_workers&#34;: self.system_dict[&#34;params&#34;][&#34;num_workers&#34;]}
+
+        self.system_dict[&#34;local&#34;][&#34;val_set&#34;] = CocoDataset(root_dir=self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;root_dir&#34;] + &#34;/&#34; + self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;coco_dir&#34;], 
+                                                    img_dir = self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;img_dir&#34;],
+                                                    set_dir = self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;set_dir&#34;],
+                                                    transform=transforms.Compose([Normalizer(), Resizer()]))
+        
+        self.system_dict[&#34;local&#34;][&#34;test_generator&#34;] = DataLoader(self.system_dict[&#34;local&#34;][&#34;val_set&#34;], 
+                                                                **self.system_dict[&#34;local&#34;][&#34;val_params&#34;])
+
+
+    def Model(self,gpu_devices=[0]):
+        &#39;&#39;&#39;
+        User function: Set Model parameters
+
+        Args:
+            gpu_devices (list): List of GPU Device IDs to be used in training
+
+        Returns:
+            None
+        &#39;&#39;&#39;
+        num_classes = self.system_dict[&#34;local&#34;][&#34;training_set&#34;].num_classes();
+        efficientdet = EfficientDet(num_classes=num_classes)
+
+        if self.system_dict[&#34;params&#34;][&#34;use_gpu&#34;]:
+            self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;] = gpu_devices
+            if len(self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;])==1:
+                os.environ[&#34;CUDA_VISIBLE_DEVICES&#34;] = str(self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;][0])
+            else:
+                os.environ[&#34;CUDA_VISIBLE_DEVICES&#34;] = &#39;,&#39;.join([str(id) for id in self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;]])
+            self.system_dict[&#34;local&#34;][&#34;device&#34;] = &#39;cuda&#39; if torch.cuda.is_available() else &#39;cpu&#39;
+            efficientdet = efficientdet.to(self.system_dict[&#34;local&#34;][&#34;device&#34;])
+            efficientdet= torch.nn.DataParallel(efficientdet).to(self.system_dict[&#34;local&#34;][&#34;device&#34;])
+
+        self.system_dict[&#34;local&#34;][&#34;model&#34;] = efficientdet;
+        self.system_dict[&#34;local&#34;][&#34;model&#34;].train();
+
+
+    def Set_Hyperparams(self, lr=0.0001, val_interval=1, es_min_delta=0.0, es_patience=0):
+        &#39;&#39;&#39;
+        User function: Set hyper parameters
+
+        Args:
+            lr (float): Initial learning rate for training
+            val_interval (int): Post specified number of training epochs, a validation epoch will be carried out
+            es_min_delta (float): Loss detla value, if loss doesnn&#39;t change more than this value for &#34;es_patience&#34; number of epochs, training will be stopped early
+            es_patience (int): If loss doesnn&#39;t change more than this &#34;es_min_delta&#34; value for &#34;es_patience&#34; number of epochs, training will be stopped early
+
+        Returns:
+            None
+        &#39;&#39;&#39;
+        self.system_dict[&#34;params&#34;][&#34;lr&#34;] = lr;
+        self.system_dict[&#34;params&#34;][&#34;val_interval&#34;] = val_interval;
+        self.system_dict[&#34;params&#34;][&#34;es_min_delta&#34;] = es_min_delta;
+        self.system_dict[&#34;params&#34;][&#34;es_patience&#34;] = es_patience;
+
+
+        self.system_dict[&#34;local&#34;][&#34;optimizer&#34;] = torch.optim.Adam(self.system_dict[&#34;local&#34;][&#34;model&#34;].parameters(), 
+                                                                    self.system_dict[&#34;params&#34;][&#34;lr&#34;]);
+
+        self.system_dict[&#34;local&#34;][&#34;scheduler&#34;] = torch.optim.lr_scheduler.ReduceLROnPlateau(self.system_dict[&#34;local&#34;][&#34;optimizer&#34;], 
+                                                                    patience=3, verbose=True)
+
+
+    def Train(self, num_epochs=2, model_output_dir=&#34;trained/&#34;):
+        &#39;&#39;&#39;
+        User function: Start training
+
+        Args:
+            num_epochs (int): Number of epochs to train for
+            model_output_dir (str): Path to directory where all trained models will be saved
+
+        Returns:
+            None
+        &#39;&#39;&#39;
+        self.system_dict[&#34;output&#34;][&#34;log_path&#34;] = &#34;tensorboard/signatrix_efficientdet_coco&#34;;
+        self.system_dict[&#34;output&#34;][&#34;saved_path&#34;] = model_output_dir;
+        self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;] = num_epochs;
+
+        if os.path.isdir(self.system_dict[&#34;output&#34;][&#34;log_path&#34;]):
+            shutil.rmtree(self.system_dict[&#34;output&#34;][&#34;log_path&#34;])
+        os.makedirs(self.system_dict[&#34;output&#34;][&#34;log_path&#34;])
+
+        if os.path.isdir(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;]):
+            shutil.rmtree(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;])
+        os.makedirs(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;])
+
+        writer = SummaryWriter(self.system_dict[&#34;output&#34;][&#34;log_path&#34;])
+
+        num_iter_per_epoch = len(self.system_dict[&#34;local&#34;][&#34;training_generator&#34;])
+
+        if(self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;status&#34;]):
+            
+            for epoch in range(self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;]):
+                self.system_dict[&#34;local&#34;][&#34;model&#34;].train()
+
+                epoch_loss = []
+                progress_bar = tqdm(self.system_dict[&#34;local&#34;][&#34;training_generator&#34;])
+                for iter, data in enumerate(progress_bar):
+                    try:
+                        self.system_dict[&#34;local&#34;][&#34;optimizer&#34;].zero_grad()
+                        if torch.cuda.is_available():
+                            cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;]).float(), data[&#39;annot&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;])])
+                        else:
+                            cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].float(), data[&#39;annot&#39;]])
+
+                        cls_loss = cls_loss.mean()
+                        reg_loss = reg_loss.mean()
+                        loss = cls_loss + reg_loss
+                        if loss == 0:
+                            continue
+                        loss.backward()
+                        torch.nn.utils.clip_grad_norm_(self.system_dict[&#34;local&#34;][&#34;model&#34;].parameters(), 0.1)
+                        self.system_dict[&#34;local&#34;][&#34;optimizer&#34;].step()
+                        epoch_loss.append(float(loss))
+                        total_loss = np.mean(epoch_loss)
+
+                        progress_bar.set_description(
+                            &#39;Epoch: {}/{}. Iteration: {}/{}. Cls loss: {:.5f}. Reg loss: {:.5f}. Batch loss: {:.5f} Total loss: {:.5f}&#39;.format(
+                                epoch + 1, self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;], iter + 1, num_iter_per_epoch, cls_loss, reg_loss, loss,
+                                total_loss))
+                        writer.add_scalar(&#39;Train/Total_loss&#39;, total_loss, epoch * num_iter_per_epoch + iter)
+                        writer.add_scalar(&#39;Train/Regression_loss&#39;, reg_loss, epoch * num_iter_per_epoch + iter)
+                        writer.add_scalar(&#39;Train/Classfication_loss (focal loss)&#39;, cls_loss, epoch * num_iter_per_epoch + iter)
+
+                    except Exception as e:
+                        print(e)
+                        continue
+                self.system_dict[&#34;local&#34;][&#34;scheduler&#34;].step(np.mean(epoch_loss))
+
+                if epoch % self.system_dict[&#34;params&#34;][&#34;val_interval&#34;] == 0:
+
+                    self.system_dict[&#34;local&#34;][&#34;model&#34;].eval()
+                    loss_regression_ls = []
+                    loss_classification_ls = []
+                    for iter, data in enumerate(self.system_dict[&#34;local&#34;][&#34;test_generator&#34;]):
+                        with torch.no_grad():
+                            if torch.cuda.is_available():
+                                cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;]).float(), data[&#39;annot&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;])])
+                            else:
+                                cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].float(), data[&#39;annot&#39;]])
+
+                            cls_loss = cls_loss.mean()
+                            reg_loss = reg_loss.mean()
+
+                            loss_classification_ls.append(float(cls_loss))
+                            loss_regression_ls.append(float(reg_loss))
+
+                    cls_loss = np.mean(loss_classification_ls)
+                    reg_loss = np.mean(loss_regression_ls)
+                    loss = cls_loss + reg_loss
+
+                    print(
+                        &#39;Epoch: {}/{}. Classification loss: {:1.5f}. Regression loss: {:1.5f}. Total loss: {:1.5f}&#39;.format(
+                            epoch + 1, self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;], cls_loss, reg_loss,
+                            np.mean(loss)))
+                    writer.add_scalar(&#39;Val/Total_loss&#39;, loss, epoch)
+                    writer.add_scalar(&#39;Val/Regression_loss&#39;, reg_loss, epoch)
+                    writer.add_scalar(&#39;Val/Classfication_loss (focal loss)&#39;, cls_loss, epoch)
+
+                    if loss + self.system_dict[&#34;params&#34;][&#34;es_min_delta&#34;] &lt; self.system_dict[&#34;output&#34;][&#34;best_loss&#34;]:
+                        self.system_dict[&#34;output&#34;][&#34;best_loss&#34;] = loss
+                        self.system_dict[&#34;output&#34;][&#34;best_epoch&#34;] = epoch
+                        torch.save(self.system_dict[&#34;local&#34;][&#34;model&#34;], 
+                            os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.pth&#34;))
+
+                        dummy_input = torch.rand(1, 3, 512, 512)
+                        if torch.cuda.is_available():
+                            dummy_input = dummy_input.cuda()
+                        if isinstance(self.system_dict[&#34;local&#34;][&#34;model&#34;], nn.DataParallel):
+                            self.system_dict[&#34;local&#34;][&#34;model&#34;].module.backbone_net.model.set_swish(memory_efficient=False)
+
+                            torch.onnx.export(self.system_dict[&#34;local&#34;][&#34;model&#34;].module, dummy_input,
+                                              os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.onnx&#34;),
+                                              verbose=False)
+                            self.system_dict[&#34;local&#34;][&#34;model&#34;].module.backbone_net.model.set_swish(memory_efficient=True)
+                        else:
+                            self.system_dict[&#34;local&#34;][&#34;model&#34;].backbone_net.model.set_swish(memory_efficient=False)
+
+                            torch.onnx.export(self.system_dict[&#34;local&#34;][&#34;model&#34;], dummy_input,
+                                              os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.onnx&#34;),
+                                              verbose=False)
+                            self.system_dict[&#34;local&#34;][&#34;model&#34;].backbone_net.model.set_swish(memory_efficient=True)
+
+                    # Early stopping
+                    if epoch - self.system_dict[&#34;output&#34;][&#34;best_epoch&#34;] &gt; self.system_dict[&#34;params&#34;][&#34;es_patience&#34;] &gt; 0:
+                        print(&#34;Stop training at epoch {}. The lowest loss achieved is {}&#34;.format(epoch, loss))
+                        break
+
+        else:
+            for epoch in range(self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;]):
+                self.system_dict[&#34;local&#34;][&#34;model&#34;].train()
+
+                epoch_loss = []
+                progress_bar = tqdm(self.system_dict[&#34;local&#34;][&#34;training_generator&#34;])
+                for iter, data in enumerate(progress_bar):
+                    try:
+                        self.system_dict[&#34;local&#34;][&#34;optimizer&#34;].zero_grad()
+                        if torch.cuda.is_available():
+                            cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;]).float(), data[&#39;annot&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;])])
+                        else:
+                            cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].float(), data[&#39;annot&#39;]])
+
+                        cls_loss = cls_loss.mean()
+                        reg_loss = reg_loss.mean()
+                        loss = cls_loss + reg_loss
+                        if loss == 0:
+                            continue
+                        loss.backward()
+                        torch.nn.utils.clip_grad_norm_(self.system_dict[&#34;local&#34;][&#34;model&#34;].parameters(), 0.1)
+                        self.system_dict[&#34;local&#34;][&#34;optimizer&#34;].step()
+                        epoch_loss.append(float(loss))
+                        total_loss = np.mean(epoch_loss)
+
+                        progress_bar.set_description(
+                            &#39;Epoch: {}/{}. Iteration: {}/{}. Cls loss: {:.5f}. Reg loss: {:.5f}. Batch loss: {:.5f} Total loss: {:.5f}&#39;.format(
+                                epoch + 1, self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;], iter + 1, num_iter_per_epoch, cls_loss, reg_loss, loss,
+                                total_loss))
+                        writer.add_scalar(&#39;Train/Total_loss&#39;, total_loss, epoch * num_iter_per_epoch + iter)
+                        writer.add_scalar(&#39;Train/Regression_loss&#39;, reg_loss, epoch * num_iter_per_epoch + iter)
+                        writer.add_scalar(&#39;Train/Classfication_loss (focal loss)&#39;, cls_loss, epoch * num_iter_per_epoch + iter)
+
+                    except Exception as e:
+                        print(e)
+                        continue
+                self.system_dict[&#34;local&#34;][&#34;scheduler&#34;].step(np.mean(epoch_loss))
+
+
+                torch.save(self.system_dict[&#34;local&#34;][&#34;model&#34;], 
+                    os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.pth&#34;))
+
+                dummy_input = torch.rand(1, 3, 512, 512)
+                if torch.cuda.is_available():
+                    dummy_input = dummy_input.to(self.system_dict[&#34;local&#34;][&#34;device&#34;])
+                if isinstance(self.system_dict[&#34;local&#34;][&#34;model&#34;], nn.DataParallel):
+                    self.system_dict[&#34;local&#34;][&#34;model&#34;].module.backbone_net.model.set_swish(memory_efficient=False)
+
+                    torch.onnx.export(self.system_dict[&#34;local&#34;][&#34;model&#34;].module, dummy_input,
+                                      os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.onnx&#34;),
+                                      verbose=False)
+                    self.system_dict[&#34;local&#34;][&#34;model&#34;].module.backbone_net.model.set_swish(memory_efficient=True)
+                else:
+                    self.system_dict[&#34;local&#34;][&#34;model&#34;].backbone_net.model.set_swish(memory_efficient=False)
+
+                    torch.onnx.export(self.system_dict[&#34;local&#34;][&#34;model&#34;], dummy_input,
+                                      os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.onnx&#34;),
+                                      verbose=False)
+                    self.system_dict[&#34;local&#34;][&#34;model&#34;].backbone_net.model.set_swish(memory_efficient=True)
+
+
+        writer.close()</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="4_efficientdet.lib.train_detector.Detector.Model"><code class="name flex">
+<span>def <span class="ident">Model</span></span>(<span>self, gpu_devices=[0])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>User function: Set Model parameters</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>gpu_devices</code></strong> :&ensp;<code>list</code></dt>
+<dd>List of GPU Device IDs to be used in training</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Model(self,gpu_devices=[0]):
+    &#39;&#39;&#39;
+    User function: Set Model parameters
+
+    Args:
+        gpu_devices (list): List of GPU Device IDs to be used in training
+
+    Returns:
+        None
+    &#39;&#39;&#39;
+    num_classes = self.system_dict[&#34;local&#34;][&#34;training_set&#34;].num_classes();
+    efficientdet = EfficientDet(num_classes=num_classes)
+
+    if self.system_dict[&#34;params&#34;][&#34;use_gpu&#34;]:
+        self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;] = gpu_devices
+        if len(self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;])==1:
+            os.environ[&#34;CUDA_VISIBLE_DEVICES&#34;] = str(self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;][0])
+        else:
+            os.environ[&#34;CUDA_VISIBLE_DEVICES&#34;] = &#39;,&#39;.join([str(id) for id in self.system_dict[&#34;params&#34;][&#34;gpu_devices&#34;]])
+        self.system_dict[&#34;local&#34;][&#34;device&#34;] = &#39;cuda&#39; if torch.cuda.is_available() else &#39;cpu&#39;
+        efficientdet = efficientdet.to(self.system_dict[&#34;local&#34;][&#34;device&#34;])
+        efficientdet= torch.nn.DataParallel(efficientdet).to(self.system_dict[&#34;local&#34;][&#34;device&#34;])
+
+    self.system_dict[&#34;local&#34;][&#34;model&#34;] = efficientdet;
+    self.system_dict[&#34;local&#34;][&#34;model&#34;].train();</code></pre>
+</details>
+</dd>
+<dt id="4_efficientdet.lib.train_detector.Detector.Set_Hyperparams"><code class="name flex">
+<span>def <span class="ident">Set_Hyperparams</span></span>(<span>self, lr=0.0001, val_interval=1, es_min_delta=0.0, es_patience=0)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>User function: Set hyper parameters</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lr</code></strong> :&ensp;<code>float</code></dt>
+<dd>Initial learning rate for training</dd>
+<dt><strong><code>val_interval</code></strong> :&ensp;<code>int</code></dt>
+<dd>Post specified number of training epochs, a validation epoch will be carried out</dd>
+<dt><strong><code>es_min_delta</code></strong> :&ensp;<code>float</code></dt>
+<dd>Loss detla value, if loss doesnn't change more than this value for "es_patience" number of epochs, training will be stopped early</dd>
+<dt><strong><code>es_patience</code></strong> :&ensp;<code>int</code></dt>
+<dd>If loss doesnn't change more than this "es_min_delta" value for "es_patience" number of epochs, training will be stopped early</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Set_Hyperparams(self, lr=0.0001, val_interval=1, es_min_delta=0.0, es_patience=0):
+    &#39;&#39;&#39;
+    User function: Set hyper parameters
+
+    Args:
+        lr (float): Initial learning rate for training
+        val_interval (int): Post specified number of training epochs, a validation epoch will be carried out
+        es_min_delta (float): Loss detla value, if loss doesnn&#39;t change more than this value for &#34;es_patience&#34; number of epochs, training will be stopped early
+        es_patience (int): If loss doesnn&#39;t change more than this &#34;es_min_delta&#34; value for &#34;es_patience&#34; number of epochs, training will be stopped early
+
+    Returns:
+        None
+    &#39;&#39;&#39;
+    self.system_dict[&#34;params&#34;][&#34;lr&#34;] = lr;
+    self.system_dict[&#34;params&#34;][&#34;val_interval&#34;] = val_interval;
+    self.system_dict[&#34;params&#34;][&#34;es_min_delta&#34;] = es_min_delta;
+    self.system_dict[&#34;params&#34;][&#34;es_patience&#34;] = es_patience;
+
+
+    self.system_dict[&#34;local&#34;][&#34;optimizer&#34;] = torch.optim.Adam(self.system_dict[&#34;local&#34;][&#34;model&#34;].parameters(), 
+                                                                self.system_dict[&#34;params&#34;][&#34;lr&#34;]);
+
+    self.system_dict[&#34;local&#34;][&#34;scheduler&#34;] = torch.optim.lr_scheduler.ReduceLROnPlateau(self.system_dict[&#34;local&#34;][&#34;optimizer&#34;], 
+                                                                patience=3, verbose=True)</code></pre>
+</details>
+</dd>
+<dt id="4_efficientdet.lib.train_detector.Detector.Train"><code class="name flex">
+<span>def <span class="ident">Train</span></span>(<span>self, num_epochs=2, model_output_dir='trained/')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>User function: Start training</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>num_epochs</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of epochs to train for</dd>
+<dt><strong><code>model_output_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to directory where all trained models will be saved</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Train(self, num_epochs=2, model_output_dir=&#34;trained/&#34;):
+    &#39;&#39;&#39;
+    User function: Start training
+
+    Args:
+        num_epochs (int): Number of epochs to train for
+        model_output_dir (str): Path to directory where all trained models will be saved
+
+    Returns:
+        None
+    &#39;&#39;&#39;
+    self.system_dict[&#34;output&#34;][&#34;log_path&#34;] = &#34;tensorboard/signatrix_efficientdet_coco&#34;;
+    self.system_dict[&#34;output&#34;][&#34;saved_path&#34;] = model_output_dir;
+    self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;] = num_epochs;
+
+    if os.path.isdir(self.system_dict[&#34;output&#34;][&#34;log_path&#34;]):
+        shutil.rmtree(self.system_dict[&#34;output&#34;][&#34;log_path&#34;])
+    os.makedirs(self.system_dict[&#34;output&#34;][&#34;log_path&#34;])
+
+    if os.path.isdir(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;]):
+        shutil.rmtree(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;])
+    os.makedirs(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;])
+
+    writer = SummaryWriter(self.system_dict[&#34;output&#34;][&#34;log_path&#34;])
+
+    num_iter_per_epoch = len(self.system_dict[&#34;local&#34;][&#34;training_generator&#34;])
+
+    if(self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;status&#34;]):
+        
+        for epoch in range(self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;]):
+            self.system_dict[&#34;local&#34;][&#34;model&#34;].train()
+
+            epoch_loss = []
+            progress_bar = tqdm(self.system_dict[&#34;local&#34;][&#34;training_generator&#34;])
+            for iter, data in enumerate(progress_bar):
+                try:
+                    self.system_dict[&#34;local&#34;][&#34;optimizer&#34;].zero_grad()
+                    if torch.cuda.is_available():
+                        cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;]).float(), data[&#39;annot&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;])])
+                    else:
+                        cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].float(), data[&#39;annot&#39;]])
+
+                    cls_loss = cls_loss.mean()
+                    reg_loss = reg_loss.mean()
+                    loss = cls_loss + reg_loss
+                    if loss == 0:
+                        continue
+                    loss.backward()
+                    torch.nn.utils.clip_grad_norm_(self.system_dict[&#34;local&#34;][&#34;model&#34;].parameters(), 0.1)
+                    self.system_dict[&#34;local&#34;][&#34;optimizer&#34;].step()
+                    epoch_loss.append(float(loss))
+                    total_loss = np.mean(epoch_loss)
+
+                    progress_bar.set_description(
+                        &#39;Epoch: {}/{}. Iteration: {}/{}. Cls loss: {:.5f}. Reg loss: {:.5f}. Batch loss: {:.5f} Total loss: {:.5f}&#39;.format(
+                            epoch + 1, self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;], iter + 1, num_iter_per_epoch, cls_loss, reg_loss, loss,
+                            total_loss))
+                    writer.add_scalar(&#39;Train/Total_loss&#39;, total_loss, epoch * num_iter_per_epoch + iter)
+                    writer.add_scalar(&#39;Train/Regression_loss&#39;, reg_loss, epoch * num_iter_per_epoch + iter)
+                    writer.add_scalar(&#39;Train/Classfication_loss (focal loss)&#39;, cls_loss, epoch * num_iter_per_epoch + iter)
+
+                except Exception as e:
+                    print(e)
+                    continue
+            self.system_dict[&#34;local&#34;][&#34;scheduler&#34;].step(np.mean(epoch_loss))
+
+            if epoch % self.system_dict[&#34;params&#34;][&#34;val_interval&#34;] == 0:
+
+                self.system_dict[&#34;local&#34;][&#34;model&#34;].eval()
+                loss_regression_ls = []
+                loss_classification_ls = []
+                for iter, data in enumerate(self.system_dict[&#34;local&#34;][&#34;test_generator&#34;]):
+                    with torch.no_grad():
+                        if torch.cuda.is_available():
+                            cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;]).float(), data[&#39;annot&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;])])
+                        else:
+                            cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].float(), data[&#39;annot&#39;]])
+
+                        cls_loss = cls_loss.mean()
+                        reg_loss = reg_loss.mean()
+
+                        loss_classification_ls.append(float(cls_loss))
+                        loss_regression_ls.append(float(reg_loss))
+
+                cls_loss = np.mean(loss_classification_ls)
+                reg_loss = np.mean(loss_regression_ls)
+                loss = cls_loss + reg_loss
+
+                print(
+                    &#39;Epoch: {}/{}. Classification loss: {:1.5f}. Regression loss: {:1.5f}. Total loss: {:1.5f}&#39;.format(
+                        epoch + 1, self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;], cls_loss, reg_loss,
+                        np.mean(loss)))
+                writer.add_scalar(&#39;Val/Total_loss&#39;, loss, epoch)
+                writer.add_scalar(&#39;Val/Regression_loss&#39;, reg_loss, epoch)
+                writer.add_scalar(&#39;Val/Classfication_loss (focal loss)&#39;, cls_loss, epoch)
+
+                if loss + self.system_dict[&#34;params&#34;][&#34;es_min_delta&#34;] &lt; self.system_dict[&#34;output&#34;][&#34;best_loss&#34;]:
+                    self.system_dict[&#34;output&#34;][&#34;best_loss&#34;] = loss
+                    self.system_dict[&#34;output&#34;][&#34;best_epoch&#34;] = epoch
+                    torch.save(self.system_dict[&#34;local&#34;][&#34;model&#34;], 
+                        os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.pth&#34;))
+
+                    dummy_input = torch.rand(1, 3, 512, 512)
+                    if torch.cuda.is_available():
+                        dummy_input = dummy_input.cuda()
+                    if isinstance(self.system_dict[&#34;local&#34;][&#34;model&#34;], nn.DataParallel):
+                        self.system_dict[&#34;local&#34;][&#34;model&#34;].module.backbone_net.model.set_swish(memory_efficient=False)
+
+                        torch.onnx.export(self.system_dict[&#34;local&#34;][&#34;model&#34;].module, dummy_input,
+                                          os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.onnx&#34;),
+                                          verbose=False)
+                        self.system_dict[&#34;local&#34;][&#34;model&#34;].module.backbone_net.model.set_swish(memory_efficient=True)
+                    else:
+                        self.system_dict[&#34;local&#34;][&#34;model&#34;].backbone_net.model.set_swish(memory_efficient=False)
+
+                        torch.onnx.export(self.system_dict[&#34;local&#34;][&#34;model&#34;], dummy_input,
+                                          os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.onnx&#34;),
+                                          verbose=False)
+                        self.system_dict[&#34;local&#34;][&#34;model&#34;].backbone_net.model.set_swish(memory_efficient=True)
+
+                # Early stopping
+                if epoch - self.system_dict[&#34;output&#34;][&#34;best_epoch&#34;] &gt; self.system_dict[&#34;params&#34;][&#34;es_patience&#34;] &gt; 0:
+                    print(&#34;Stop training at epoch {}. The lowest loss achieved is {}&#34;.format(epoch, loss))
+                    break
+
+    else:
+        for epoch in range(self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;]):
+            self.system_dict[&#34;local&#34;][&#34;model&#34;].train()
+
+            epoch_loss = []
+            progress_bar = tqdm(self.system_dict[&#34;local&#34;][&#34;training_generator&#34;])
+            for iter, data in enumerate(progress_bar):
+                try:
+                    self.system_dict[&#34;local&#34;][&#34;optimizer&#34;].zero_grad()
+                    if torch.cuda.is_available():
+                        cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;]).float(), data[&#39;annot&#39;].to(self.system_dict[&#34;local&#34;][&#34;device&#34;])])
+                    else:
+                        cls_loss, reg_loss = self.system_dict[&#34;local&#34;][&#34;model&#34;]([data[&#39;img&#39;].float(), data[&#39;annot&#39;]])
+
+                    cls_loss = cls_loss.mean()
+                    reg_loss = reg_loss.mean()
+                    loss = cls_loss + reg_loss
+                    if loss == 0:
+                        continue
+                    loss.backward()
+                    torch.nn.utils.clip_grad_norm_(self.system_dict[&#34;local&#34;][&#34;model&#34;].parameters(), 0.1)
+                    self.system_dict[&#34;local&#34;][&#34;optimizer&#34;].step()
+                    epoch_loss.append(float(loss))
+                    total_loss = np.mean(epoch_loss)
+
+                    progress_bar.set_description(
+                        &#39;Epoch: {}/{}. Iteration: {}/{}. Cls loss: {:.5f}. Reg loss: {:.5f}. Batch loss: {:.5f} Total loss: {:.5f}&#39;.format(
+                            epoch + 1, self.system_dict[&#34;params&#34;][&#34;num_epochs&#34;], iter + 1, num_iter_per_epoch, cls_loss, reg_loss, loss,
+                            total_loss))
+                    writer.add_scalar(&#39;Train/Total_loss&#39;, total_loss, epoch * num_iter_per_epoch + iter)
+                    writer.add_scalar(&#39;Train/Regression_loss&#39;, reg_loss, epoch * num_iter_per_epoch + iter)
+                    writer.add_scalar(&#39;Train/Classfication_loss (focal loss)&#39;, cls_loss, epoch * num_iter_per_epoch + iter)
+
+                except Exception as e:
+                    print(e)
+                    continue
+            self.system_dict[&#34;local&#34;][&#34;scheduler&#34;].step(np.mean(epoch_loss))
+
+
+            torch.save(self.system_dict[&#34;local&#34;][&#34;model&#34;], 
+                os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.pth&#34;))
+
+            dummy_input = torch.rand(1, 3, 512, 512)
+            if torch.cuda.is_available():
+                dummy_input = dummy_input.to(self.system_dict[&#34;local&#34;][&#34;device&#34;])
+            if isinstance(self.system_dict[&#34;local&#34;][&#34;model&#34;], nn.DataParallel):
+                self.system_dict[&#34;local&#34;][&#34;model&#34;].module.backbone_net.model.set_swish(memory_efficient=False)
+
+                torch.onnx.export(self.system_dict[&#34;local&#34;][&#34;model&#34;].module, dummy_input,
+                                  os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.onnx&#34;),
+                                  verbose=False)
+                self.system_dict[&#34;local&#34;][&#34;model&#34;].module.backbone_net.model.set_swish(memory_efficient=True)
+            else:
+                self.system_dict[&#34;local&#34;][&#34;model&#34;].backbone_net.model.set_swish(memory_efficient=False)
+
+                torch.onnx.export(self.system_dict[&#34;local&#34;][&#34;model&#34;], dummy_input,
+                                  os.path.join(self.system_dict[&#34;output&#34;][&#34;saved_path&#34;], &#34;signatrix_efficientdet_coco.onnx&#34;),
+                                  verbose=False)
+                self.system_dict[&#34;local&#34;][&#34;model&#34;].backbone_net.model.set_swish(memory_efficient=True)
+
+
+    writer.close()</code></pre>
+</details>
+</dd>
+<dt id="4_efficientdet.lib.train_detector.Detector.Train_Dataset"><code class="name flex">
+<span>def <span class="ident">Train_Dataset</span></span>(<span>self, root_dir, coco_dir, img_dir, set_dir, batch_size=8, image_size=512, use_gpu=True, num_workers=3)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>User function: Set training dataset parameters</p>
+<p>Dataset Directory Structure</p>
+<pre><code>       root_dir
+          |
+          |------coco_dir 
+          |         |
+          |         |----img_dir
+          |                |
+          |                |------&lt;set_dir_train&gt; (set_dir) (Train)
+          |                         |
+          |                         |---------img1.jpg
+          |                         |---------img2.jpg
+          |                         |---------..........(and so on)  
+          |
+          |
+          |         |---annotations 
+          |         |----|
+          |              |--------------------instances_Train.json  (instances_&lt;set_dir_train&gt;.json)
+          |              |--------------------classes.txt
+
+
+ - instances_Train.json -&gt; In proper COCO format
+ - classes.txt          -&gt; A list of classes in alphabetical order
+
+
+For TrainSet
+ - root_dir = "../sample_dataset";
+ - coco_dir = "kangaroo";
+ - img_dir = "images";
+ - set_dir = "Train";
+
+
+Note: Annotation file name too coincides against the set_dir
+</code></pre>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>root_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to root directory containing coco_dir</dd>
+<dt><strong><code>coco_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of coco_dir containing image folder and annotation folder</dd>
+<dt><strong><code>img_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of folder containing all training and validation folders</dd>
+<dt><strong><code>set_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of folder containing all training images</dd>
+<dt><strong><code>batch_size</code></strong> :&ensp;<code>int</code></dt>
+<dd>Mini batch sampling size for training epochs</dd>
+<dt><strong><code>image_size</code></strong> :&ensp;<code>int</code></dt>
+<dd>Either of [512, 300]</dd>
+<dt><strong><code>use_gpu</code></strong> :&ensp;<code>bool</code></dt>
+<dd>If True use GPU else run on CPU</dd>
+<dt><strong><code>num_workers</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of parallel processors for data loader </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Train_Dataset(self, root_dir, coco_dir, img_dir, set_dir, batch_size=8, image_size=512, use_gpu=True, num_workers=3):
+    &#39;&#39;&#39;
+    User function: Set training dataset parameters
+
+    Dataset Directory Structure
+
+               root_dir
+                  |
+                  |------coco_dir 
+                  |         |
+                  |         |----img_dir
+                  |                |
+                  |                |------&lt;set_dir_train&gt; (set_dir) (Train)
+                  |                         |
+                  |                         |---------img1.jpg
+                  |                         |---------img2.jpg
+                  |                         |---------..........(and so on)  
+                  |
+                  |
+                  |         |---annotations 
+                  |         |----|
+                  |              |--------------------instances_Train.json  (instances_&lt;set_dir_train&gt;.json)
+                  |              |--------------------classes.txt
+                  
+                  
+         - instances_Train.json -&gt; In proper COCO format
+         - classes.txt          -&gt; A list of classes in alphabetical order
+         
+
+        For TrainSet
+         - root_dir = &#34;../sample_dataset&#34;;
+         - coco_dir = &#34;kangaroo&#34;;
+         - img_dir = &#34;images&#34;;
+         - set_dir = &#34;Train&#34;;
+        
+         
+        Note: Annotation file name too coincides against the set_dir
+
+    Args:
+        root_dir (str): Path to root directory containing coco_dir
+        coco_dir (str): Name of coco_dir containing image folder and annotation folder
+        img_dir (str): Name of folder containing all training and validation folders
+        set_dir (str): Name of folder containing all training images
+        batch_size (int): Mini batch sampling size for training epochs
+        image_size (int): Either of [512, 300]
+        use_gpu (bool): If True use GPU else run on CPU
+        num_workers (int): Number of parallel processors for data loader 
+
+    Returns:
+        None
+    &#39;&#39;&#39;
+    self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;root_dir&#34;] = root_dir;
+    self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;coco_dir&#34;] = coco_dir;
+    self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;img_dir&#34;] = img_dir;
+    self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;set_dir&#34;] = set_dir;
+
+
+    self.system_dict[&#34;params&#34;][&#34;batch_size&#34;] = batch_size;
+    self.system_dict[&#34;params&#34;][&#34;image_size&#34;] = image_size;
+    self.system_dict[&#34;params&#34;][&#34;use_gpu&#34;] = use_gpu;
+    self.system_dict[&#34;params&#34;][&#34;num_workers&#34;] = num_workers;
+
+    if(self.system_dict[&#34;params&#34;][&#34;use_gpu&#34;]):
+        if torch.cuda.is_available():
+            self.system_dict[&#34;local&#34;][&#34;num_gpus&#34;] = torch.cuda.device_count()
+            torch.cuda.manual_seed(123)
+        else:
+            torch.manual_seed(123)
+
+    self.system_dict[&#34;local&#34;][&#34;training_params&#34;] = {&#34;batch_size&#34;: self.system_dict[&#34;params&#34;][&#34;batch_size&#34;] * self.system_dict[&#34;local&#34;][&#34;num_gpus&#34;],
+                                                       &#34;shuffle&#34;: True,
+                                                       &#34;drop_last&#34;: True,
+                                                       &#34;collate_fn&#34;: collater,
+                                                       &#34;num_workers&#34;: self.system_dict[&#34;params&#34;][&#34;num_workers&#34;]}
+
+    self.system_dict[&#34;local&#34;][&#34;training_set&#34;] = CocoDataset(root_dir=self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;root_dir&#34;] + &#34;/&#34; + self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;coco_dir&#34;],
+                                                        img_dir = self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;img_dir&#34;],
+                                                        set_dir = self.system_dict[&#34;dataset&#34;][&#34;train&#34;][&#34;set_dir&#34;],
+                                                        transform = transforms.Compose([Normalizer(), Augmenter(), Resizer()]))
+    
+    self.system_dict[&#34;local&#34;][&#34;training_generator&#34;] = DataLoader(self.system_dict[&#34;local&#34;][&#34;training_set&#34;], 
+                                                                **self.system_dict[&#34;local&#34;][&#34;training_params&#34;]);</code></pre>
+</details>
+</dd>
+<dt id="4_efficientdet.lib.train_detector.Detector.Val_Dataset"><code class="name flex">
+<span>def <span class="ident">Val_Dataset</span></span>(<span>self, root_dir, coco_dir, img_dir, set_dir)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>User function: Set training dataset parameters</p>
+<p>Dataset Directory Structure</p>
+<pre><code>       root_dir
+          |
+          |------coco_dir 
+          |         |
+          |         |----img_dir
+          |                |
+          |                |------&lt;set_dir_val&gt; (set_dir) (Validation)
+          |                         |
+          |                         |---------img1.jpg
+          |                         |---------img2.jpg
+          |                         |---------..........(and so on)  
+          |
+          |
+          |         |---annotations 
+          |         |----|
+          |              |--------------------instances_Val.json  (instances_&lt;set_dir_val&gt;.json)
+          |              |--------------------classes.txt
+
+
+ - instances_Train.json -&gt; In proper COCO format
+ - classes.txt          -&gt; A list of classes in alphabetical order
+
+
+For ValSet
+ - root_dir = "..sample_dataset";
+ - coco_dir = "kangaroo";
+ - img_dir = "images";
+ - set_dir = "Val";
+
+ Note: Annotation file name too coincides against the set_dir
+</code></pre>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>root_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to root directory containing coco_dir</dd>
+<dt><strong><code>coco_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of coco_dir containing image folder and annotation folder</dd>
+<dt><strong><code>img_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of folder containing all training and validation folders</dd>
+<dt><strong><code>set_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of folder containing all validation images</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Val_Dataset(self, root_dir, coco_dir, img_dir, set_dir):
+    &#39;&#39;&#39;
+    User function: Set training dataset parameters
+
+    Dataset Directory Structure
+
+               root_dir
+                  |
+                  |------coco_dir 
+                  |         |
+                  |         |----img_dir
+                  |                |
+                  |                |------&lt;set_dir_val&gt; (set_dir) (Validation)
+                  |                         |
+                  |                         |---------img1.jpg
+                  |                         |---------img2.jpg
+                  |                         |---------..........(and so on)  
+                  |
+                  |
+                  |         |---annotations 
+                  |         |----|
+                  |              |--------------------instances_Val.json  (instances_&lt;set_dir_val&gt;.json)
+                  |              |--------------------classes.txt
+                  
+                  
+         - instances_Train.json -&gt; In proper COCO format
+         - classes.txt          -&gt; A list of classes in alphabetical order
+
+         
+        For ValSet
+         - root_dir = &#34;..sample_dataset&#34;;
+         - coco_dir = &#34;kangaroo&#34;;
+         - img_dir = &#34;images&#34;;
+         - set_dir = &#34;Val&#34;;
+         
+         Note: Annotation file name too coincides against the set_dir
+
+    Args:
+        root_dir (str): Path to root directory containing coco_dir
+        coco_dir (str): Name of coco_dir containing image folder and annotation folder
+        img_dir (str): Name of folder containing all training and validation folders
+        set_dir (str): Name of folder containing all validation images
+
+    Returns:
+        None
+    &#39;&#39;&#39;
+    self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;status&#34;] = True;
+    self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;root_dir&#34;] = root_dir;
+    self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;coco_dir&#34;] = coco_dir;
+    self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;img_dir&#34;] = img_dir;
+    self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;set_dir&#34;] = set_dir;     
+
+    self.system_dict[&#34;local&#34;][&#34;val_params&#34;] = {&#34;batch_size&#34;: self.system_dict[&#34;params&#34;][&#34;batch_size&#34;],
+                                               &#34;shuffle&#34;: False,
+                                               &#34;drop_last&#34;: False,
+                                               &#34;collate_fn&#34;: collater,
+                                               &#34;num_workers&#34;: self.system_dict[&#34;params&#34;][&#34;num_workers&#34;]}
+
+    self.system_dict[&#34;local&#34;][&#34;val_set&#34;] = CocoDataset(root_dir=self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;root_dir&#34;] + &#34;/&#34; + self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;coco_dir&#34;], 
+                                                img_dir = self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;img_dir&#34;],
+                                                set_dir = self.system_dict[&#34;dataset&#34;][&#34;val&#34;][&#34;set_dir&#34;],
+                                                transform=transforms.Compose([Normalizer(), Resizer()]))
+    
+    self.system_dict[&#34;local&#34;][&#34;test_generator&#34;] = DataLoader(self.system_dict[&#34;local&#34;][&#34;val_set&#34;], 
+                                                            **self.system_dict[&#34;local&#34;][&#34;val_params&#34;])</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="4_efficientdet.lib" href="index.html">4_efficientdet.lib</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="4_efficientdet.lib.train_detector.Detector" href="#4_efficientdet.lib.train_detector.Detector">Detector</a></code></h4>
+<ul class="">
+<li><code><a title="4_efficientdet.lib.train_detector.Detector.Model" href="#4_efficientdet.lib.train_detector.Detector.Model">Model</a></code></li>
+<li><code><a title="4_efficientdet.lib.train_detector.Detector.Set_Hyperparams" href="#4_efficientdet.lib.train_detector.Detector.Set_Hyperparams">Set_Hyperparams</a></code></li>
+<li><code><a title="4_efficientdet.lib.train_detector.Detector.Train" href="#4_efficientdet.lib.train_detector.Detector.Train">Train</a></code></li>
+<li><code><a title="4_efficientdet.lib.train_detector.Detector.Train_Dataset" href="#4_efficientdet.lib.train_detector.Detector.Train_Dataset">Train_Dataset</a></code></li>
+<li><code><a title="4_efficientdet.lib.train_detector.Detector.Val_Dataset" href="#4_efficientdet.lib.train_detector.Detector.Val_Dataset">Val_Dataset</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
